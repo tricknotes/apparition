@@ -18,7 +18,11 @@ module Capybara::Apparition
       end
 
       def add(id, target)
-        @targets[id] = target
+        if @targets.key?(id)
+          raise ArgumentError, "Target already exists"
+        else
+          @targets[id] = target
+        end
       end
 
       def delete(id)

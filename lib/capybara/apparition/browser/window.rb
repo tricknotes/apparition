@@ -2,7 +2,7 @@
 
 module Capybara::Apparition
   class Browser
-    module Windows
+    module Window
       def window_handle
         @current_page_handle
       end
@@ -16,6 +16,7 @@ module Capybara::Apparition
         raise NoSuchWindowError unless target&.page
 
         target.page.wait_for_loaded
+        puts "set cur page handle to #{handle}"
         @current_page_handle = handle
       end
 
@@ -25,11 +26,17 @@ module Capybara::Apparition
         target_id = info['targetId']
         target = DevToolsProtocol::Target.new(self, info.merge('type' => 'page', 'inherit' => current_page))
         target.page # Ensure page object construction happens
-        @targets.add(target_id, target)
+        begin
+          puts "Adding #{target_id} - #{target.info}"
+          @targets.add(target_id, target)
+        rescue ArgumentError
+          puts "Target already existed"
+        end
         target_id
       end
 
       def close_window(handle)
+        puts "set cur page handle to nil"
         @current_page_handle = nil if @current_page_handle == handle
         win_target = @targets.delete(handle)
         warn 'Window was already closed unexpectedly' if win_target.nil?

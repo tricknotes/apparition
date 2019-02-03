@@ -5,14 +5,26 @@ require 'capybara/apparition/dev_tools_protocol/session'
 module Capybara::Apparition
   module DevToolsProtocol
     class Target
-      attr_accessor :info
+      # attr_accessor :info
 
       def initialize(browser, info)
         @browser = browser
-        @info = info
+        @info = info # .freeze
         @page = nil
       end
 
+      def info
+        @info
+      end
+      
+      def info=(inf)
+        @info=inf
+      end
+      
+      def update(new_info)
+        info = (info || {}).merge(new_info) # .freeze
+      end
+      
       def id
         info['targetId']
       end

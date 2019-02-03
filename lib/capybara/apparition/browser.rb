@@ -4,13 +4,13 @@ require 'capybara/apparition/errors'
 require 'capybara/apparition/dev_tools_protocol/target_manager'
 require 'capybara/apparition/page'
 require 'capybara/apparition/console'
-require 'capybara/apparition/browser/headers'
-require 'capybara/apparition/browser/windows'
+require 'capybara/apparition/browser/header'
+require 'capybara/apparition/browser/window'
 require 'capybara/apparition/browser/render'
-require 'capybara/apparition/browser/cookies'
-require 'capybara/apparition/browser/modals'
-require 'capybara/apparition/browser/frames'
-require 'capybara/apparition/browser/auths'
+require 'capybara/apparition/browser/cookie'
+require 'capybara/apparition/browser/modal'
+require 'capybara/apparition/browser/frame'
+require 'capybara/apparition/browser/auth'
 require 'json'
 require 'time'
 
@@ -29,6 +29,7 @@ module Capybara::Apparition
 
     def initialize(client, logger = nil)
       @client = client
+      puts "Setting current_page_handle to nil"
       @current_page_handle = nil
       @targets = Capybara::Apparition::DevToolsProtocol::TargetManager.new
       @context_id = nil
@@ -72,23 +73,34 @@ module Capybara::Apparition
       current_page.click_at(x, y)
     end
 
-    include Headers
-    include Windows
+    include Header
+    include Window
     include Render
-    include Cookies
-    include Modals
-    include Frames
-    include Auths
+    include Cookie
+    include Modal
+    include Frame
+    include Auth
 
     def reset
       
-      context_id = current_target.context_id
-      begin
-        command('Target.disposeBrowserContext', browserContextId: context_id) if context_id
-      rescue WrongWorld
-        # already gone
+      # context_id = current_target.context_id
+      @targets.of_type('page').values.each do |target|
+        # client.send_cmd('Target.disposeBrowserContext', borwserContextId:target.id).discard_result
+        # res = client.send_cmd('Target.close_target', targetId: target.id).result['success']
+        begin
+          res = client.send_cmd('Target.disposeBrowserContext', browserContextId: target.context_id).result
+        rescue WrongWorld
+          puts "Unknown browserContextId"
+        end
+        # async_command('Target.disposeBrowserContext', browserContextId: target.id)
+        @targets.delete(target.id)
       end
-      @targets.delete(@current_page_handle)
+      # begin
+      #   command('Target.disposeBrowserContext', browserContextId: context_id) if context_id
+      # rescue WrongWorld
+      #   # already gone
+      # end
+      # @targets.delete(@current_page_handle)
       context_id = command('Target.createBrowserContext')['browserContextId']
       target_id = command('Target.createTarget', url: 'about:blank', browserContextId: context_id)['targetId']
 
@@ -101,6 +113,7 @@ module Capybara::Apparition
         end
         sleep 0.01
       end
+      puts "Setting Current page handle to #{target_id}"
       @current_page_handle = target_id
       true
     end
@@ -175,6 +188,7 @@ module Capybara::Apparition
     def current_target
       @targets.get(@current_page_handle) || begin
         puts "No current page: #{@current_page_handle}"
+        puts caller
         @current_page_handle = nil
         raise NoSuchWindowError
       end
@@ -273,7 +287,7 @@ module Capybara::Apparition
         target_info = info['targetInfo']
         target = @targets.get(target_info['targetId'])
         if target
-          target.info.merge!(target_info)
+          target.update(target_info)
         else
           puts '****No target for the info change- creating****' if ENV['DEBUG']
           @targets.add(target_info['targetId'], DevToolsProtocol::Target.new(self, target_info))

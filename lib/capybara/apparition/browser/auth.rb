@@ -2,7 +2,7 @@
 
 module Capybara::Apparition
   class Browser
-    module Auths
+    module Auth
       def set_proxy_auth(user, password)
         set_auth(:proxy, user, password)
       end

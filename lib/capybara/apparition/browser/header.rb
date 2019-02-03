@@ -2,7 +2,7 @@
 
 module Capybara::Apparition
   class Browser
-    module Headers
+    module Header
       def headers
         current_page.extra_headers
       end

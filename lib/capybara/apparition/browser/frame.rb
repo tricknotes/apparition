@@ -2,7 +2,7 @@
 
 module Capybara::Apparition
   class Browser
-    module Frames
+    module Frame
       def switch_to_frame(frame)
         case frame
         when Capybara::Node::Base

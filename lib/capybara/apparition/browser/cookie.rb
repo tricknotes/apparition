@@ -4,7 +4,7 @@ require 'capybara/apparition/cookie_jar'
 
 module Capybara::Apparition
   class Browser
-    module Cookies
+    module Cookie
       def cookies
         CookieJar.new(
           # current_page.command('Network.getCookies')['cookies'].map { |c| Cookie.new(c) }

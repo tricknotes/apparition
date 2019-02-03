@@ -2,7 +2,7 @@
 
 module Capybara::Apparition
   class Browser
-    module Modals
+    module Modal
       def accept_alert
         current_page.add_modal(alert: true)
       end

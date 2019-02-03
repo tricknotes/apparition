@@ -235,6 +235,7 @@ module Capybara::Apparition
       until cf.usable? || (allow_obsolete && cf.obsolete?) || @js_error
         if timer.expired?
           puts 'Timedout waiting for page to be loaded'
+          byebug
           raise TimeoutError.new('wait_for_loaded')
         end
         sleep 0.05
