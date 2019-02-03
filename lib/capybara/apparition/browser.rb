@@ -88,19 +88,13 @@ module Capybara::Apparition
         # client.send_cmd('Target.disposeBrowserContext', borwserContextId:target.id).discard_result
         # res = client.send_cmd('Target.close_target', targetId: target.id).result['success']
         begin
-          res = client.send_cmd('Target.disposeBrowserContext', browserContextId: target.context_id).result
+          client.send_cmd('Target.disposeBrowserContext', browserContextId: target.context_id).discard_result
         rescue WrongWorld
           puts "Unknown browserContextId"
         end
-        # async_command('Target.disposeBrowserContext', browserContextId: target.id)
         @targets.delete(target.id)
       end
-      # begin
-      #   command('Target.disposeBrowserContext', browserContextId: context_id) if context_id
-      # rescue WrongWorld
-      #   # already gone
-      # end
-      # @targets.delete(@current_page_handle)
+
       context_id = command('Target.createBrowserContext')['browserContextId']
       target_id = command('Target.createTarget', url: 'about:blank', browserContextId: context_id)['targetId']
 
@@ -108,12 +102,10 @@ module Capybara::Apparition
       until @targets.get(target_id)&.page&.usable?
         if timer.expired?
           puts 'Timedout waiting for reset'
-          # byebug
           raise TimeoutError.new('reset')
         end
         sleep 0.01
       end
-      puts "Setting Current page handle to #{target_id}"
       @current_page_handle = target_id
       true
     end

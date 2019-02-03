@@ -20,7 +20,9 @@ module Capybara::Apparition
       end
 
       def get_raw_cookies
-        current_page.command('Network.getAllCookies')['cookies'].map { |c| Cookie.new(c) }
+        current_page.command('Network.getAllCookies')['cookies'].map do |c| 
+          Capybara::Apparition::Cookie.new(c)
+        end
       end
 
       def set_cookie(cookie)

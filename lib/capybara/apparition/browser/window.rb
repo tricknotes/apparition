@@ -16,7 +16,6 @@ module Capybara::Apparition
         raise NoSuchWindowError unless target&.page
 
         target.page.wait_for_loaded
-        puts "set cur page handle to #{handle}"
         @current_page_handle = handle
       end
 
@@ -36,7 +35,6 @@ module Capybara::Apparition
       end
 
       def close_window(handle)
-        puts "set cur page handle to nil"
         @current_page_handle = nil if @current_page_handle == handle
         win_target = @targets.delete(handle)
         warn 'Window was already closed unexpectedly' if win_target.nil?
